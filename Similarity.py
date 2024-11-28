@@ -1,78 +1,36 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
-import json
-from datasets import load_dataset, load_from_disk
-import Data_processing_ as dp
-from joblib import Parallel, delayed
 from itertools import combinations_with_replacement
 from tqdm import tqdm
+import random
+
 def get_datasets(dataset_name1, dataset_name2):
+    """
+    Function to read the data used for similarity the similarity calculations.
+    takes in two csv files with an "embeddings" column and returns the dataframes.
+    """
     df1 = pd.read_csv(f"preprocessed_data\\{dataset_name1}\\{dataset_name1}_embeddings.csv")
     df2 = pd.read_csv(f"preprocessed_data\\{dataset_name2}\\{dataset_name2}_embeddings.csv")
 
     return df1, df2
 
-def get_dataset(dataset_name1):
-    dataset1 = load_from_disk(f"Data\\metadata\\{dataset_name1}_metadata\\full")
-
-    df1 = dataset1.to_pandas()
-
-    return df1
-
-def avg_cosine_similarity(df1_name, df2_name):
-    # Calculates the similarity between two datasets
-    df1, df2 = get_datasets(df1_name, df2_name)
-    embeddings1 = np.array(df1["embeddings"].tolist())
-    embeddings2 = np.array(df2["embeddings"].tolist())
-    
-    # Calculate cosine similarity between every embedding in df1 and every embedding in df2, then take the mean of the similarity for each product 
-    similarity_matrix = cosine_similarity(embeddings1, embeddings2)
-    avg_similarity = similarity_matrix.mean(axis=1)
-    df1 = df1.copy()
-    df1[f"avg_similarity_to_{df2_name}"] = avg_similarity
-    return df1
-
-def avg_cosine_similarity_to_multiple(df1_name, df2_names):
-    # Calculates the similarity between one target dataset and multiple other datasets
-    df1, _ = get_datasets(df1_name, df1_name)
-    embeddings1 = np.array(df1["embeddings"].tolist())
-    df1_with_similarities = df1.copy()
-
-    for df2_name in df2_names:
-        _, df2 = get_datasets(df1_name, df2_name)
-        embeddings2 = np.array(df2["embeddings"].tolist())
-
-        similarity_matrix = cosine_similarity(embeddings1, embeddings2)
-        avg_similarity = similarity_matrix.mean(axis=1)
-        df1_with_similarities[f"avg_similarity_to_{df2_name}"] = avg_similarity
-
-    return df1_with_similarities
-########################################
-
-import numpy as np
-import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
-from itertools import combinations_with_replacement
-from tqdm import tqdm
-
-
-def cosine_similarity_matrix_final():
-    path_to_amazon_reviews_categories = "data/amazon_reviews_categories.txt"
-    with open(path_to_amazon_reviews_categories, "r") as f:
-        df_names = f.read().splitlines()
-
-    # Calculates a similarity matrix for unique dataset combinations
-    similarity_results = []
-    dataset_combinations = combinations_with_replacement(df_names, 2)
-
+def cosine_similarity_pairs(dataset_pairs):
+    """
+    Calculates the cosine similarity between the embeddings of specific dataset pairs at the item level.
+    creates a csv file with the similarity values for each item in the first dataset to each item in the second dataset.
+    """
     chunk_size = 500  # Define chunk size for embeddings
+    max_items = 50000  # Define the maximum number of items to process
 
-    for df1_name, df2_name in tqdm(dataset_combinations):
-        print(f"\nProcessing {df1_name} and {df2_name}\n")  # Debugging
-
+    for df1_name, df2_name in tqdm(dataset_pairs):
+        print(f"\n----Processing pairs {df1_name} and {df2_name}----")  # Debugging
+        
         # Retrieve the datasets
         df1, df2 = get_datasets(df1_name, df2_name)
+        
+        df1 = sample_dataset(df1, max_items)
+        df2 = sample_dataset(df2, max_items)
 
         # Normalize embeddings
         def normalize_embeddings(df):
@@ -95,11 +53,101 @@ def cosine_similarity_matrix_final():
 
         df1 = quantize_to_int8(df1)
         df2 = quantize_to_int8(df2)
-        print("Embeddings normalized and quantized\n")  # Debugging
+        print("Embeddings normalized and quantized")  # Debugging
+
         embeddings1 = np.array(df1["embeddings"].tolist(), dtype=np.int8)
         embeddings2 = np.array(df2["embeddings"].tolist(), dtype=np.int8)
 
-        print("Quantized embeddings converted to NumPy arrays\n")  # Debugging
+        print("Quantized embeddings converted to NumPy arrays")  # Debugging
+
+        # Compute similarity in chunks
+        num_rows_df1 = embeddings1.shape[0]
+        num_rows_df2 = embeddings2.shape[0]
+
+        similarity_list = []
+        with tqdm(total=num_rows_df1 * num_rows_df2, desc="Processing chunks", leave=False) as pbar:
+            for start_idx1 in range(0, num_rows_df1, chunk_size):
+                chunk1 = embeddings1[start_idx1:start_idx1 + chunk_size]
+
+                for start_idx2 in range(0, num_rows_df2, chunk_size):
+                    chunk2 = embeddings2[start_idx2:start_idx2 + chunk_size]
+
+                    # Rescale chunks
+                    chunk1_rescaled = chunk1.astype(np.float32) / 127 * max_val1
+                    chunk2_rescaled = chunk2.astype(np.float32) / 127 * max_val2
+
+                    # Compute cosine similarity
+                    similarity_matrix = cosine_similarity(chunk1_rescaled, chunk2_rescaled)
+                    similarity_list.append(similarity_matrix)
+
+                    
+
+        # Concatenate similarities and calculate per-item averages
+        full_similarity_matrix = np.vstack(similarity_list)
+        df1[f"similarity_to_{df2_name}"] = full_similarity_matrix.mean(axis=1)
+
+        print(f"Added similarity column for {df1_name} to {df2_name}")  # Debugging
+
+        # Save the updated dataframe
+        df1.to_csv(f"results/{df1_name}_similarities.csv", index=False)
+
+    print("Finished processing all specified pairs.")  # Debugging
+
+########################################
+
+def sample_dataset(df, n):
+    if len(df) > n:
+        sampled_df = df.sample(n=n, random_state=42).reset_index(drop=True)
+    else:
+        sampled_df = df  # If the dataset is smaller than n, use the whole dataset
+    return sampled_df
+
+def cosine_similarity_matrix_final():
+    path_to_amazon_reviews_categories = "data/amazon_reviews_categories.txt"
+    with open(path_to_amazon_reviews_categories, "r") as f:
+        df_names = f.read().splitlines()
+
+    # Calculates a similarity matrix for unique dataset combinations
+    similarity_results = []
+    dataset_combinations = combinations_with_replacement(df_names, 2)
+
+    chunk_size = 500  # Define chunk size for embeddings
+    max_items = 10000
+    for df1_name, df2_name in tqdm(dataset_combinations):
+        print(f"\n----Processing {df1_name} and {df2_name}----")  # Debugging
+
+        # Retrieve the datasets
+        df1, df2 = get_datasets(df1_name, df2_name)
+
+        df1 = sample_dataset(df1, max_items)
+        df2 = sample_dataset(df2, max_items)
+        print(f"Sampled datasets to a maximum of {max_items} items\n")
+        # Normalize embeddings
+        def normalize_embeddings(df):
+            df["embeddings"] = df["embeddings"].apply(
+                lambda x: np.fromstring(x.strip('[]'), sep=' ')
+            )
+            max_val = np.abs(df["embeddings"].apply(np.max).max())
+            df["embeddings"] = df["embeddings"].apply(lambda x: x / max_val)
+            return max_val, df
+
+        max_val1, df1 = normalize_embeddings(df1)
+        max_val2, df2 = normalize_embeddings(df2)
+
+        # Quantize embeddings to int8
+        def quantize_to_int8(df):
+            df["embeddings"] = df["embeddings"].apply(
+                lambda x: (x * 127).astype(np.int8)
+            )
+            return df
+
+        df1 = quantize_to_int8(df1)
+        df2 = quantize_to_int8(df2)
+        print("Embeddings normalized and quantized")  # Debugging
+        embeddings1 = np.array(df1["embeddings"].tolist(), dtype=np.int8)
+        embeddings2 = np.array(df2["embeddings"].tolist(), dtype=np.int8)
+
+        print("Quantized embeddings converted to NumPy arrays")  # Debugging
 
         # Compute similarity in chunks
         num_rows_df1 = embeddings1.shape[0]
@@ -136,10 +184,10 @@ def cosine_similarity_matrix_final():
         })
 
         # Save results incrementally
-        with open("results/results.txt", "a") as f:
+        with open("results/results_sampled.txt", "a") as f:
             f.write(f"{df1_name} \t {df2_name} \t {avg_similarity_full}\n")
 
-    print("Finished processing, saving last items.\n")  # Debugging
+    print("Finished processing, saving last items.")  # Debugging
 
     # Convert to DataFrame for better visualization
     similarity_results_df = pd.DataFrame(similarity_results)
@@ -147,82 +195,43 @@ def cosine_similarity_matrix_final():
     # Save the results to a file
     try:
         print("Saving full similarity results to a file")  # Debugging
-        similarity_results_df.to_csv("results/similarity_results.csv", index=False)
+        similarity_results_df.to_csv("results/similarity_results_sampled.csv", index=False)
     except Exception as e:
         print(f"Could not save the results to a file: {e}")
 
     return similarity_results_df
 
-
-
-####################
-# Chunked Version
-
-def calculate_avg_cosine_similarity_chunked(embeddings1, embeddings2, chunk_size=1000):
+def process_dataset_pairs(file_path):
     """
-    Computes the average cosine similarity between two large embedding matrices
-    by processing them in smaller chunks.
+    takes the results from the similarity calculations and returns the top 2, middle 1 and least 2 dataset pairs.
     """
-    n1, n2 = len(embeddings1), len(embeddings2)
-    avg_similarity = 0
-    total_count = 0
+    columns = ["dataset1", "dataset2", "similarity"]
+    df = pd.read_csv(file_path, sep="\t", names=columns)
+    df["dataset1"] = df["dataset1"].str.strip()
+    df["dataset2"] = df["dataset2"].str.strip()
+    df = df[df["dataset1"] != df["dataset2"]]
 
-    # Loop through chunks of embeddings1
-    for i in range(0, n1, chunk_size):
-        chunk1 = embeddings1[i:i+chunk_size]
-        
-        # Loop through chunks of embeddings2
-        for j in range(0, n2, chunk_size):
-            chunk2 = embeddings2[j:j+chunk_size]
-            
-            # Compute cosine similarity for the current chunk pair
-            similarity_matrix = cosine_similarity(chunk1, chunk2)
-            avg_similarity += similarity_matrix.sum()
-            total_count += similarity_matrix.size
-
-    # Calculate average similarity
-    avg_similarity /= total_count
-    return avg_similarity
-
-
-def process_combination_chunked(df1_name, df2_name, chunk_size=1000):
-    """
-    Processes a single dataset combination using chunked cosine similarity.
-    """
-    df1, df2 = get_datasets(df1_name, df2_name)
-    embeddings1 = np.array(df1["embeddings"].tolist())
-    embeddings2 = np.array(df2["embeddings"].tolist())
-    avg_similarity = calculate_avg_cosine_similarity_chunked(embeddings1, embeddings2, chunk_size)
-    return {
-        "Dataset 1": df1_name,
-        "Dataset 2": df2_name,
-        "Average Similarity": avg_similarity
-    }
-
-
-def cosine_similarity_matrix_chunked(df_names, chunk_size=1000):
-    """
-    Computes the average cosine similarity matrix for all unique dataset combinations,
-    processing embeddings in chunks sequentially.
-    """
-    from itertools import combinations_with_replacement
     
-    similarity_results = []
-    dataset_combinations = combinations_with_replacement(df_names, 2)
+    df = df.sort_values(by="similarity", ascending=False).reset_index(drop=True)
+    top_2 = df.iloc[:2]  
+    middle_1 = df.iloc[[len(df) // 2]] 
+    least_2 = df.iloc[-2:]  
 
-    for df1_name, df2_name in dataset_combinations:
-        result = process_combination_chunked(df1_name, df2_name, chunk_size)
-        similarity_results.append(result)
+    result = pd.concat([top_2, middle_1, least_2])
+    dataset_pairs = list(zip(result["dataset1"], result["dataset2"]))
 
-    # Convert results to a DataFrame
-    similarity_results_df = pd.DataFrame(similarity_results)
-    return similarity_results_df
+    return dataset_pairs
+
 
 def main():
-    # Calculate the similarity matrix
-    similarity_results_df = cosine_similarity_matrix_final()
-    print("finished caluculating similarity")
-    print(similarity_results_df)
+    # # Calculate the average similarity between two full datasets
+    # similarity_results_df = cosine_similarity_matrix_final()
+    # print("finished caluculating similarity")
+    # print(similarity_results_df)
+
+    # Calculate the similarity between pairs of datasets at the item level
+    dataset_pairs = process_dataset_pairs("results/results_sampled.txt") # get the dataset pairs
+    cosine_similarity_pairs(dataset_pairs) # calculate the similarity between the pairs
 
 if __name__ == "__main__":
     main()
