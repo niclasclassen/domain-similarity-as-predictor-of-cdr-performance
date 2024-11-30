@@ -110,3 +110,5 @@ Arts_Crafts_and_Sewing 	 Software 	 0.1189024050149728
 Arts_Crafts_and_Sewing 	 Sports_and_Outdoors 	 0.21035841431530874
 Arts_Crafts_and_Sewing 	 Subscription_Boxes 	 0.17374434463344332
 Arts_Crafts_and_Sewing 	 Tools_and_Home_Improvement 	 0.21551107009073558
+Arts_Crafts_and_Sewing 	 Toys_and_Games 	 0.2078626527968538
+Arts_Crafts_and_Sewing 	 Video_Games 	 0.14379378915798244

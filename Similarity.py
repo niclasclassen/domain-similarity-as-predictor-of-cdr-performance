@@ -24,7 +24,7 @@ def cosine_similarity_pairs():
     #                  ("Software", "Video_Games"), 
     #                  ("Musical_Instruments", "Video_Games"),
     #                    ("Kindle_Store","Books"), ("CDs_and_Vinyl","Books"), ("Electronics","Books")]
-    dataset_pairs = [("CDs_and_Vinyl","Books"), ("Electronics","Books")]
+    dataset_pairs = [("Movies_and_TV","Books"), ("Health_and_Household","Books")]
     chunk_size = 500  # Define chunk size for embeddings
     max_items = 250000  # Define the maximum number of items to process
 
