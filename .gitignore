@@ -1,2 +1,5 @@
 .venv
+*.venv-recbole-cdr
 *.DS_Store
+data/metadata/
+data/reviews/
