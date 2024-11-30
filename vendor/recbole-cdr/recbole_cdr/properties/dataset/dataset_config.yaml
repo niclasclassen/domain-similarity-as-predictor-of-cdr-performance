@@ -1,0 +1,39 @@
+# dataset config
+gpu_id: 0 # GPU used for training. 0 indicates the first GPU.
+state: INFO # Logging level
+field_separator: "\t" # Separator of fields in the dataset file
+source_domain:
+  dataset: source_domain_reviews # Name of the dataset
+  data_path: "recbole_cdr/dataset/" # Path to the dataset
+  seq_separator: " " # Separator of sequences in the dataset file
+  USER_ID_FIELD: user_id # Field name of user id
+  ITEM_ID_FIELD: item_id # Field name of item id
+  RATING_FIELD: rating # Field name of rating
+  TIME_FIELD: timestamp # Field name of timestamp
+  NEG_PREFIX: neg_ # Prefix of negative samples
+  LABEL_FIELD: label # Field name of label
+  load_col:
+    inter: [user_id, item_id, rating] # Columns to load
+  user_inter_num_interval: "[3,inf)" # filter of user's interaction number
+  item_inter_num_interval: "[5,inf)" # filter of item's interaction number
+  val_interval:
+    rating: "[3,inf)" # Specify the interval of rating values. For example, "[3,inf)" means the rating values are in the range of [3, inf).
+  drop_filter_field: True # If True, fields used for filtering (like user_inter_num_interval and item_inter_num_interval) are dropped from the dataset after filtering.
+
+target_domain:
+  dataset: target_domain_reviews
+  data_path: "recbole_cdr/dataset/"
+  seq_separator: ","
+  USER_ID_FIELD: user_id
+  ITEM_ID_FIELD: item_id
+  RATING_FIELD: rating
+  TIME_FIELD: timestamp
+  NEG_PREFIX: neg_
+  LABEL_FIELD: label
+  load_col:
+    inter: [user_id, item_id, rating]
+  user_inter_num_interval: "[3,inf)"
+  item_inter_num_interval: "[5,inf)"
+  val_interval:
+    rating: "[3,inf)"
+  drop_filter_field: True
