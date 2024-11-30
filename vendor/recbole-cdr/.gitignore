@@ -5,7 +5,8 @@
 general_yaml
 docs/
 .vscode/
-dataset/
+dataset/source*
+dataset/target*
 
 .idea/
 *.pyc
