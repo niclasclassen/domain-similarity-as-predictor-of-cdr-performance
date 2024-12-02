@@ -33,10 +33,10 @@ def cosine_similarity_pairs():
         
         # Retrieve the datasets
         df1, df2 = get_datasets(df1_name, df2_name)
-        
+        print("finished reading datasets")  # Debugging
         df1 = sample_dataset(df1, max_items)
         df2 = sample_dataset(df2, max_items)
-
+        print("sampled datasets")  # Debugging
         # Normalize embeddings
         def normalize_embeddings(df):
             df["embeddings"] = df["embeddings"].apply(
@@ -48,7 +48,7 @@ def cosine_similarity_pairs():
 
         max_val1, df1 = normalize_embeddings(df1)
         max_val2, df2 = normalize_embeddings(df2)
-
+        print("Embeddings normalized")  # Debugging
         # Quantize embeddings to int8
         def quantize_to_int8(df):
             df["embeddings"] = df["embeddings"].apply(
@@ -58,7 +58,7 @@ def cosine_similarity_pairs():
 
         df1 = quantize_to_int8(df1)
         df2 = quantize_to_int8(df2)
-        print("Embeddings normalized and quantized")  # Debugging
+        print("Embeddings quantized")  # Debugging
 
         embeddings1 = np.array(df1["embeddings"].tolist(), dtype=np.int8)
         embeddings2 = np.array(df2["embeddings"].tolist(), dtype=np.int8)
