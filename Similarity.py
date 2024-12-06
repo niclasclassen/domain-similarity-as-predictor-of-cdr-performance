@@ -24,7 +24,7 @@ def cosine_similarity_pairs():
     #                  ("Software", "Video_Games"), 
     #                  ("Musical_Instruments", "Video_Games"),
     #                    ("Kindle_Store","Books"), ("CDs_and_Vinyl","Books"), ("Electronics","Books")]
-    dataset_pairs = [("Movies_and_TV","Books"), ("Health_and_Household","Books")]
+    dataset_pairs = [("Health_and_Household","Books")]
     chunk_size = 500  # Define chunk size for embeddings
     max_items = 250000  # Define the maximum number of items to process
 
@@ -69,7 +69,7 @@ def cosine_similarity_pairs():
         num_rows_df1 = embeddings1.shape[0]
         num_rows_df2 = embeddings2.shape[0]
         avg_similarities = np.zeros(len(embeddings1))
-
+        
         
         with tqdm(total=num_rows_df1 * num_rows_df2, desc="Processing chunks", leave=False) as pbar:
             # Initialize an array to hold the averaged similarities for df1
