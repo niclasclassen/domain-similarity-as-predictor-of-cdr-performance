@@ -4,18 +4,18 @@ use_gpu: True
 seed: 2022
 state: INFO
 reproducibility: True
-data_path: 'dataset/'
-checkpoint_dir: 'saved'
-show_progress: True
+data_path: "dataset/"
+checkpoint_dir: "saved"
+show_progress: False
 save_dataset: False
 dataset_save_path: ~
 save_dataloaders: False
 dataloaders_save_path: ~
 log_wandb: False
-wandb_project: 'recbole_cdr'
+wandb_project: ""
 
 # training settings
-train_epochs: ["BOTH:300"]
+train_epochs: ["BOTH:100"]
 train_batch_size: 2048
 learner: adam
 learning_rate: 0.001
@@ -30,14 +30,14 @@ loss_decimal_place: 4
 require_pow: False
 
 # evaluation settings
-eval_args: 
-  split: {'RS':[0.8,0.1,0.1]}
-  split_valid: {'RS':[0.8,0.2]}
+eval_args:
+  split: { "RS": [0.8, 0.1, 0.1] }
+  split_valid: { "RS": [0.8, 0.2] }
   group_by: user
   order: RO
   mode: full
 repeatable: False
-metrics: ["Recall","MRR","NDCG","Hit","Precision"]
+metrics: ["Recall", "MRR", "NDCG", "Hit", "Precision"]
 topk: [10]
 valid_metric: MRR@10
 valid_metric_bigger: True

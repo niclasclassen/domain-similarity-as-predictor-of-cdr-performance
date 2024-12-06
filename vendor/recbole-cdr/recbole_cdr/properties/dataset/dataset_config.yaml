@@ -4,7 +4,7 @@ state: INFO # Logging level
 field_separator: "\t" # Separator of fields in the dataset file
 source_domain:
   dataset: source_domain_reviews # Name of the dataset
-  data_path: "recbole_cdr/dataset/" # Path to the dataset
+  data_path: "aasdf/recbole_cdr/dataset/" # Path to the dataset
   seq_separator: " " # Separator of sequences in the dataset file
   USER_ID_FIELD: user_id # Field name of user id
   ITEM_ID_FIELD: item_id # Field name of item id
@@ -22,7 +22,7 @@ source_domain:
 
 target_domain:
   dataset: target_domain_reviews
-  data_path: "recbole_cdr/dataset/"
+  data_path: "/asdfasdf/recbole_cdr/dataset/"
   seq_separator: ","
   USER_ID_FIELD: user_id
   ITEM_ID_FIELD: item_id
