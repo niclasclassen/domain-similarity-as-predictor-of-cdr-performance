@@ -8,6 +8,7 @@ from recbole.config.configurator import Config as RecBole_Config
 
 from recbole_debias.utils import get_model
 from recbole_debias.evaluator import update_metrics
+import yaml
 
 
 class Config(RecBole_Config):
@@ -33,7 +34,6 @@ class Config(RecBole_Config):
         super(Config, self).__init__(model, dataset, config_file_list, config_dict)
 
     def _get_model_and_dataset(self, model, dataset):  # 获取模型和数据集名称
-
         if model is None:
             try:
                 model = self.external_config_dict['model']
@@ -65,12 +65,23 @@ class Config(RecBole_Config):
     def _load_internal_config_dict(self, model, model_class, dataset):  # 加载内部已有配置
         super()._load_internal_config_dict(model, model_class, dataset)
         current_path = os.path.dirname(os.path.realpath(__file__))
-        overall_init_file = os.path.join(current_path, '../properties/overall.yaml')
+        overall_init_file_path = os.path.join(current_path, '../properties/overall.yaml')
         model_init_file = os.path.join(current_path, '../properties/model/' + model + '.yaml')
         sample_init_file = os.path.join(current_path, '../properties/dataset/sample.yaml')
-        dataset_init_file = os.path.join(current_path, '../properties/dataset/' + dataset + '.yaml')
+        dataset_init_file = os.path.join(current_path, '../properties/dataset/' + "dataset_config" + '.yaml') # TODO: remove hardcoded
 
-        for file in [overall_init_file, model_init_file, sample_init_file, dataset_init_file]:
+        # Load the overall_init_file as a dictionary
+        with open(overall_init_file_path, 'r') as file:
+            overall_init_dict = yaml.safe_load(file)
+
+        # Update the data_path in the dictionary
+        overall_init_dict['data_path'] = os.path.join(current_path, '../dataset')
+
+        # Save the updated dictionary back to the file if needed
+        with open(overall_init_file_path, 'w') as file:
+            yaml.safe_dump(overall_init_dict, file)
+
+        for file in [overall_init_file_path, model_init_file, sample_init_file, dataset_init_file]:
             if os.path.isfile(file):
                 config_dict = self._update_internal_config_dict(file)
                 if file == dataset_init_file:
