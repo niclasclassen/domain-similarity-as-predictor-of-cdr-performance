@@ -3,4 +3,6 @@
 *.DS_Store
 data/metadata/
 data/reviews/
+data/item_similarity/
 .venv_recbole_debias
+__pycache__
