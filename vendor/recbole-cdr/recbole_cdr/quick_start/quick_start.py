@@ -44,6 +44,22 @@ def run_recbole_cdr(model=None, config_file_list=None, config_dict=None, saved=T
     # dataset splitting
     train_data, valid_data, test_data = data_preparation(config, dataset)
 
+    # Modification to get user ids of the test data
+    all_user_ids = []
+    for batch in test_data:
+        interaction = batch[0]  # Access the first element of the batch
+        user_ids = interaction[
+            "target_user_id"
+        ].numpy()  # Use the correct key for user IDs
+        for user_id in user_ids:
+            all_user_ids.append(user_id)
+    # Write all_user_ids to a file
+    model_name = config["model"]
+    filename = f"{model_name}_all_user_ids.txt"
+    with open(filename, "w") as f:
+        for user_id in all_user_ids:
+            f.write(str(user_id) + "\n")
+
     # model loading and initialization
     init_seed(config["seed"], config["reproducibility"])
     model = get_model(config["model"])(config, train_data.dataset).to(config["device"])

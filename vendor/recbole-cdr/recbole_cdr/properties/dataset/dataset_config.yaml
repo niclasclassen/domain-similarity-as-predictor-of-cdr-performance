@@ -14,8 +14,8 @@ source_domain:
   LABEL_FIELD: label # Field name of label
   load_col:
     inter: [user_id, item_id, rating] # Columns to load
-  user_inter_num_interval: "[3,inf)" # filter of user's interaction number
-  item_inter_num_interval: "[5,inf)" # filter of item's interaction number
+  user_inter_num_interval: "[2,inf)" # filter of user's interaction number
+  item_inter_num_interval: "[2,inf)" # filter of item's interaction number
   val_interval:
     rating: "[3,inf)" # Specify the interval of rating values. For example, "[3,inf)" means the rating values are in the range of [3, inf).
   drop_filter_field: True # If True, fields used for filtering (like user_inter_num_interval and item_inter_num_interval) are dropped from the dataset after filtering.
@@ -32,8 +32,8 @@ target_domain:
   LABEL_FIELD: label
   load_col:
     inter: [user_id, item_id, rating]
-  user_inter_num_interval: "[3,inf)"
-  item_inter_num_interval: "[5,inf)"
+  user_inter_num_interval: "[2,inf)"
+  item_inter_num_interval: "[2,inf)"
   val_interval:
     rating: "[3,inf)"
   drop_filter_field: True

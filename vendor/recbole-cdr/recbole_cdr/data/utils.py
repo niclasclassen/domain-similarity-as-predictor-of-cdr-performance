@@ -125,6 +125,21 @@ def data_preparation(config, dataset):
         set_color(f'[{config["eval_batch_size"]}]', 'yellow') + set_color(' eval_args', 'cyan') + ': ' +
         set_color(f'[{config["eval_args"]}]', 'yellow')
     )
+     # Print inter_feat attribute if it exists
+    if hasattr(target_test_dataset, "inter_feat"):
+        if "target_user_id" in target_test_dataset.inter_feat:
+            user_ids = target_test_dataset.inter_feat["target_user_id"]
+            if hasattr(target_test_dataset, "id2token"):
+                # Convert each user ID individually
+                original_user_ids = [
+                    target_test_dataset.id2token("target_user_id", uid.item())
+                    for uid in user_ids
+                ]
+
+                # Save the mapping to a file
+                with open("user_id_mapping.txt", "w") as f:
+                    for new_id, original_id in zip(user_ids, original_user_ids):
+                        f.write(f"{new_id.item()},{original_id}\n")
     return train_data, valid_data, test_data
 
 

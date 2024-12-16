@@ -7,7 +7,6 @@ preprocessed_data/
 Models/
 data/
 .gitingore
-vendor/
 test_docker/
 results/
 log/

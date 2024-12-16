@@ -357,7 +357,7 @@ class CrossDomainDataset:
         """
         source_user_set = set(self.source_domain_dataset.inter_feat[self.source_domain_dataset.uid_field])
         target_user_set = set(self.target_domain_dataset.inter_feat[self.target_domain_dataset.uid_field])
-
+        logger = getLogger()
         if self.source_domain_dataset.user_feat is not None:
             source_user_set = source_user_set | set(
                 self.source_domain_dataset.user_feat[self.source_domain_dataset.uid_field])
