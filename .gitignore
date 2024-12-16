@@ -3,6 +3,16 @@
 *.DS_Store
 data/metadata/
 data/reviews/
+preprocessed_data/
+Models/
+data/
+.gitingore
+vendor/
+test_docker/
+results/
+log/
+__pycache__/
+sampled_embeddings/
 data/item_similarity/
 .venv_recbole_debias
 __pycache__

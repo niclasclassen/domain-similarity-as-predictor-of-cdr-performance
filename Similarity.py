@@ -5,15 +5,15 @@ from itertools import combinations_with_replacement
 from tqdm import tqdm
 import random
 
-def get_datasets(dataset_name1, dataset_name2):
+def get_datasets(dataset_name1):
     """
     Function to read the data used for similarity the similarity calculations.
     takes in two csv files with an "embeddings" column and returns the dataframes.
     """
     df1 = pd.read_csv(f"preprocessed_data\\{dataset_name1}\\{dataset_name1}_embeddings.csv")
-    df2 = pd.read_csv(f"preprocessed_data\\{dataset_name2}\\{dataset_name2}_embeddings.csv")
+    #df2 = pd.read_csv(f"preprocessed_data\\{dataset_name2}\\{dataset_name2}_embeddings.csv")
 
-    return df1, df2
+    return df1#, df2
 
 def cosine_similarity_pairs():
     """
@@ -129,13 +129,13 @@ def cosine_similarity_matrix_final():
 
     chunk_size = 500  # Define chunk size for embeddings
     max_items = 10000
-    valid_domains = ["Books", "Clothing_Shoes_and_Jewelry"]
+    valid_domains = ["Clothing_Shoes_and_Jewelry"]
     #store the df1
     dataframe = None
     previous_dataset_name = ""
     for df1_name, df2_name in tqdm(dataset_combinations):
         if not df1_name in valid_domains:
-            break
+            continue
         print(f"\n----Processing {df1_name} and {df2_name}----")  # Debugging
         if previous_dataset_name != df1_name:
             df1 = get_datasets(df1_name)
@@ -254,13 +254,13 @@ def process_dataset_pairs(file_path):
 
 def main():
     # Calculate the average similarity between two full datasets
-    # similarity_results_df = cosine_similarity_matrix_final()
-    # print("finished caluculating similarity")
+    similarity_results_df = cosine_similarity_matrix_final()
+    print("finished caluculating similarity")
     # print(similarity_results_df)
 
     # Calculate the similarity between pairs of datasets at the item level
     #dataset_pairs = process_dataset_pairs("results/results_sampled.txt") # get the dataset pairs
-    cosine_similarity_pairs() # calculate the similarity between the pairs
+    #cosine_similarity_pairs() # calculate the similarity between the pairs
 
 if __name__ == "__main__":
     main()
