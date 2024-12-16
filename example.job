@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#SBATCH --job-name=video_music  # Job name
+#SBATCH --output=job.%j.out      # Name of output file (%j expands to jobId)
+#SBATCH --cpus-per-task=1        # Schedule 1 cores (includes hyperthreading)
+#SBATCH --gres=gpu:1               # Schedule a GPU, or more with gpu:2 etc
+#SBATCH --time=16:00:00          # Run time (hh:mm:ss) - run for one hour max
+#SBATCH --partition=acltr   #can change this to acltr for longer running jobs
+#SBATCH --mail-type=START,FAIL,END
+
+echo "pull data"
+singularity pull recbole_cdr.sif docker://niclasclassen/research-project-recbole-cdr
+
+echo "run container"
+singularity run --nv \
+  -B ../config/overall.yaml:/app/recbole_cdr/properties/dataset/overall.yaml \
+  -B ../config/dataset_config.yaml:/app/recbole_cdr/properties/dataset_config.yaml \
+  -B ../config/CoNet.yaml:/app/recbole_cdr/properties/model/CoNet.yaml \
+  -B ../config/EMCDR.yaml:/app/recbole_cdr/properties/model/EMCDR.yaml \
+  -B ../config/SSCDR.yaml:/app/recbole_cdr/properties/model/SSCDR.yaml \
+  -B ../data/software_reviews:/app/recbole_cdr/dataset/source_domain_reviews/source_domain_reviews.inter \
+  -B ../data/video_games_reviews:/app/recbole_cdr/dataset/target_domain_reviews/target_domain_reviews.inter \
+  recbole_cdr.sif
+
+echo "Running on $(hostname):"

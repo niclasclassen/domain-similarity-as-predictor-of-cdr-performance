@@ -92,32 +92,38 @@ class CDRConfig(Config):
                 "If you want to run cross-domain recommender, "
                 "name of both source domain and target domain should be specified in config file."
             )
+        current_path = os.path.dirname(os.path.realpath(__file__))
         if source_dataset_name == "ml-100k" or source_dataset_name == "ml-1m":
-            current_path = os.path.dirname(os.path.realpath(__file__))
             self.final_config_dict["source_domain"]["data_path"] = os.path.join(
                 current_path, "../dataset_example/" + source_dataset_name
             )
         else:
+            current_path = os.path.dirname(os.path.realpath(__file__))
             if "data_path" not in self.final_config_dict["source_domain"]:
                 data_path = self.final_config_dict["data_path"]
             else:
                 data_path = self.final_config_dict["source_domain"]["data_path"]
+
             self.final_config_dict["source_domain"]["data_path"] = os.path.join(
-                data_path, source_dataset_name
+                current_path, "../dataset/", source_dataset_name
             )
+            # print(
+            #     "source_domain data_path",
+            #     self.final_config_dict["source_domain"]["data_path"],
+            # )
 
         if target_dataset_name == "ml-100k" or target_dataset_name == "ml-1m":
-            current_path = os.path.dirname(os.path.realpath(__file__))
             self.final_config_dict["target_domain"]["data_path"] = os.path.join(
                 current_path, "../dataset_example/" + target_dataset_name
             )
         else:
+            current_path = os.path.dirname(os.path.realpath(__file__))
             if "data_path" not in self.final_config_dict["target_domain"]:
                 data_path = self.final_config_dict["data_path"]
             else:
                 data_path = self.final_config_dict["target_domain"]["data_path"]
             self.final_config_dict["target_domain"]["data_path"] = os.path.join(
-                data_path, target_dataset_name
+                current_path, "../dataset/" + target_dataset_name
             )
 
         self.final_config_dict["dataset"] = {
@@ -154,7 +160,6 @@ class CDRConfig(Config):
         sample_init_file = os.path.join(
             current_path, "../properties/dataset/dataset_config.yaml"
         )
-
         self.internal_config_dict = dict()
         for file in [overall_init_file, model_init_file, sample_init_file]:
             if os.path.isfile(file):

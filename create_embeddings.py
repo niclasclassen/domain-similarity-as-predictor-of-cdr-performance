@@ -7,12 +7,14 @@ class PreProcess_embeddings:
     def __init__(self, dataset_list):
         self.dataset_list = dataset_list
         self.model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-        
+    
+    def sample_dataset(self, dataset):
+        return dataset.sample(n=100000, random_state=1).reset_index(drop=True)
     def load_data(self, dataset_name): 
         dataset_path = f"preprocessed_data/{dataset_name}/{dataset_name}_filtered_metadata.csv"
         dataset = pd.read_csv(dataset_path)
         # remove the images, videos, store and author columns
-        dataset = dataset.drop(columns=["images", "videos", "store", "author"])
+        dataset = dataset.drop(columns=["store", "author"])
         return dataset
     
     def combine_columns(self, dataset):
@@ -34,6 +36,8 @@ class PreProcess_embeddings:
     def main(self):
         for dataset_name in self.dataset_list:
             dataset = self.load_data(dataset_name)
+            print(f"Processing dataset: {dataset_name}")
+            #dataset = self.sample_dataset(dataset)
             dataset = self.combine_columns(dataset)
             dataset = self.generate_embeddings(dataset)
             self.save_embeddings(dataset, dataset_name)

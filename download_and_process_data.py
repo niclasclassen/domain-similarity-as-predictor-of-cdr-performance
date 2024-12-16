@@ -79,3 +79,4 @@ with open(path_to_amazon_reviews_categories, "r") as f:
 
 # Process categories
 download_and_process_categories(categories, dataset, raw_review_data_suffix, raw_metadata_suffix, data_path, output_path)
+
