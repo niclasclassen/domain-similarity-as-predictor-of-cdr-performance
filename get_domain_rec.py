@@ -12,7 +12,7 @@ def get_latest_timestamp(domain):
             review = json.loads(line)
             latest_review_timestamp = max(latest_review_timestamp, review["timestamp"])
     return latest_review_timestamp
-def fix_niclas_mistake(domain): 
+def set_columns(domain): 
     path = f"results/full_split_cdr_data/{domain}_reviews"
     reviews = pd.read_csv(path, sep='\t')
     print("read data")
@@ -96,7 +96,7 @@ def main():
     parser.add_argument("--domain", type=str, default='all', help="domain to get reviews from")
     args = parser.parse_args()
     # get_domain_reviews_data(args.domain)
-    # fix_niclas_mistake(args.domain)
+    # set_columns(args.domain)
     sample_data(args.domain)
     # make_rec_df(args.source_domain, args.target_domain)
     # print('Done')
