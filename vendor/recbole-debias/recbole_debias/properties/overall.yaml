@@ -1,0 +1,57 @@
+checkpoint_dir: saved
+clip_grad_norm: null
+data_path: place_holder
+dataloaders_save_path: null
+dataset_save_path: null
+enable_amp: false
+enable_scaler: false
+epochs: 100
+eval_args:
+  group_by: user
+  mode: full
+  order: RO
+  split:
+    RS:
+      - 0.8
+      - 0.1
+      - 0.1
+eval_batch_size: 4096
+eval_step: 1
+gpu_id: "0"
+learner: adam
+learning_rate: 0.001
+log_wandb: false
+loss_decimal_place: 4
+metric_decimal_place: 4
+metrics:
+  - Recall
+  - MRR
+  - NDCG
+  - Hit
+  - Precision
+repeatable: false
+reproducibility: true
+require_pow: false
+save_dataloaders: false
+save_dataset: false
+seed: 2020
+show_progress: false
+shuffle: true
+state: INFO
+stopping_step: 10
+topk:
+  - 10
+train_batch_size: 2048
+train_neg_sample_args:
+  alpha: 1.0
+  candidate_num: 0
+  distribution: uniform
+  dynamic: false
+  sample_num: 1
+transform: null
+use_gpu: true
+valid_metric: NDCG@10
+valid_metric_bigger: true
+wandb_project: recbole_debias
+weight_decay: 0.0
+worker: 0
