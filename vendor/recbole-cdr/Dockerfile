@@ -18,6 +18,8 @@ RUN pip install recbole==1.0.1 --default-timeout=100 --retries=10
 # Install torch version >=1.7.0
 RUN pip install torch>=1.7.0
 
+COPY metrics_adjusted.py /usr/local/lib/python3.7/site-packages/recbole/evaluator/metrics.py
+
 # Make port 80 available to the world outside this container
 EXPOSE 80
 
