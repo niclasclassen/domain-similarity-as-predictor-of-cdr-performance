@@ -2,7 +2,7 @@
 
 ## Abstract
 
-In this study we try to determine whether there exists a correlation between domain similarity and negative transfer in Cross Domain Recommender systems. We do this by employing two distinct approaches, one relying on semantical similarity of domains and the other relying on rating based pattern similarity of the domains. For these approaches we then investigate whether there exists a statistically significant difference in the performances that is correlated with the degree of similarity. Ultimately we find no grounds for accurately determining statistically significant results indicating a correlation. But we believe further research is worthwhile and required in order to make a final conclusion.
+This study investigates the potential correlation between domain similarity and negative transfer in cross-domain recommender systems. Two approaches are employed to measure domain similarity: one based on semantic similarity and the other on rating pattern similarity. Using these measures, we examine whether statistically significant differences in performance can be linked to the degree of similarity between domains. Our findings do not provide sufficient evidence to establish a statistically significant correlation. However, we argue that further research is essential to draw definitive conclusions.  
 
 ---
 
